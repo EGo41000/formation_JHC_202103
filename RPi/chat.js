@@ -9,17 +9,29 @@ const SerialPort = require('serialport')
 const port = new SerialPort('/dev/ttyACM0', {
   baudRate: 115200
 });
+var sense = require("sense-hat-led");
 
 console.log("networkInterfaces:", os.networkInterfaces());
 
 // =======================================================
 // API pour alumer/éteindre la LED
 // On ajoute aussi un message dans le chat.
+var state=0;
 app.put('/arduino/:v', (req, res) => {
   console.log("app PUT ARDUINO", req.params);
 	res.send("OK");
+	state = parseInt(req.params.v);
 	io.emit('chat message', "LED: "+req.params.v);
 	port.write(req.params.v);
+});
+app.get('/arduino', (req, res) => {
+  console.log("app GET ARDUINO", req.params);
+	res.send(state ? "ON" : "OFF");
+});
+app.put('/led/:msg', (req, res) => {
+  console.log("app PUT LED", req.params);
+  res.send("OK");
+  sense.showMessage(req.params.msg);
 });
 
 // =======================================================
